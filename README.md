@@ -60,7 +60,8 @@ The installer will:
 - Create a venv at `server\.venv` and install dependencies
 - Prompt you for your Onshape access key + secret (secret is masked)
 - Auto-detect your Bambu Studio install path
-- Write `config.json` (with ACLs restricted to your Windows user)
+- Write `config.json` and attempt to lock its ACL to your Windows user
+  (best-effort; harmless if it can't)
 - Run a smoke test against the Onshape API
 - Offer to install the bridge to your Startup folder (auto-launch on login)
 - Start the bridge immediately
@@ -80,6 +81,7 @@ time to update credentials.
 
 1. Open any Part Studio at `cad.onshape.com`.
 2. A green **Send to Bambu** button appears in the bottom-right corner.
+   You can drag it anywhere on the page — its position is remembered.
 3. Click it → check the parts you want → **Export & Open**.
 4. Bambu Studio launches with the parts loaded.
 
@@ -108,7 +110,7 @@ Exported files live at `%USERPROFILE%\OnshapeExports\<DocName>__<ElementName>\`.
 | `onshape_base_url` | Onshape host (default `https://cad.onshape.com`) |
 | `bambu_studio_path` | Full path to `bambu-studio.exe` |
 | `export_dir` | Where exports land (empty = `~/OnshapeExports`) |
-| `export_format` | `"3MF"` or `"STL"` |
+| `export_format` | `"3MF"` (default) or `"STL"` |
 | `port` | Local port the bridge listens on (default 7777) |
 
 See [`config.example.json`](config.example.json) for the template.
@@ -120,7 +122,7 @@ If you change the port, also update the `BRIDGE` constant at the top of
 
 **Is it running?** Open `http://127.0.0.1:7777/health` in your browser.
 
-**Logs**: `server\bridge.log` — every launch overwrites the file.
+**Logs**: `server\bridge.log` — overwritten on each launch.
 
 **Restart**: Task Manager → kill `python.exe`, then re-login (autostart picks
 it up) or double-click `server\start-bridge.vbs`.
@@ -139,16 +141,20 @@ onshape-bambu/
 ├─ README.md
 ├─ server/
 │  ├─ main.py               # FastAPI bridge service
+│  ├─ smoke_test.py         # Auth check used by install.ps1
 │  ├─ requirements.txt
 │  ├─ start-bridge.bat      # Runs the service and writes a log
-│  └─ start-bridge.vbs      # Hidden-window launcher for the .bat
+│  └─ start-bridge.vbs      # Hidden-window launcher for the .bat (portable)
 └─ userscript/
    └─ onshape-bambu.user.js # Tampermonkey button + modal
 ```
 
 ## Security notes
 
-- `config.json` has its ACL restricted to your user by the installer.
+- `config.json` is gitignored and the installer tries to restrict its ACL to
+  your Windows user (via `icacls`). On Windows the file also inherits your
+  user-profile-adjacent directory permissions, so other users on the same
+  machine cannot read it by default.
 - The bridge listens on `127.0.0.1` only and accepts CORS only from
   `https://cad.onshape.com`. It is **not** exposed to your network.
 - Any program already running on your machine can call the bridge

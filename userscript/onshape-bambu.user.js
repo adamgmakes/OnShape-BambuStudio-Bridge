@@ -35,12 +35,14 @@
   // ---------- UI ----------
   const css = `
   #osb-btn {
-    position: fixed; right: 18px; bottom: 18px; z-index: 999999;
+    position: fixed; z-index: 999999;
     background: #00b386; color: #fff; border: none; border-radius: 999px;
     padding: 10px 16px; font: 600 13px system-ui, sans-serif;
-    box-shadow: 0 4px 14px rgba(0,0,0,.25); cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,.25); cursor: grab;
+    user-select: none; touch-action: none;
   }
   #osb-btn:hover { background: #009973; }
+  #osb-btn.osb-dragging { cursor: grabbing; opacity: .85; }
   #osb-modal-bg {
     position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 999998;
     display: flex; align-items: center; justify-content: center;
@@ -72,13 +74,84 @@
   style.textContent = css;
   document.head.appendChild(style);
 
+  const POS_KEY = 'osb-btn-pos';
+  // Default well above Onshape's bottom tab bar.
+  const DEFAULT_POS = { left: window.innerWidth - 160, top: window.innerHeight - 120 };
+
+  function loadPos() {
+    try {
+      const p = JSON.parse(localStorage.getItem(POS_KEY));
+      if (p && typeof p.left === 'number' && typeof p.top === 'number') return p;
+    } catch {}
+    return DEFAULT_POS;
+  }
+
+  function clampPos(pos) {
+    const pad = 4;
+    const w = window.innerWidth, h = window.innerHeight;
+    return {
+      left: Math.max(pad, Math.min(pos.left, w - 60 - pad)),
+      top:  Math.max(pad, Math.min(pos.top,  h - 30 - pad)),
+    };
+  }
+
+  function applyPos(btn, pos) {
+    const c = clampPos(pos);
+    btn.style.left = c.left + 'px';
+    btn.style.top = c.top + 'px';
+  }
+
   function makeButton() {
     if (document.getElementById('osb-btn')) return;
     const btn = document.createElement('button');
     btn.id = 'osb-btn';
     btn.textContent = 'Send to Bambu';
-    btn.onclick = openModal;
+    btn.title = 'Click to send. Drag to move.';
+    applyPos(btn, loadPos());
     document.body.appendChild(btn);
+
+    // Drag-to-move with click/drag disambiguation: a movement of < 4px between
+    // pointerdown and pointerup counts as a click and opens the modal.
+    let startX = 0, startY = 0, originLeft = 0, originTop = 0;
+    let moved = false, dragging = false, pointerId = null;
+
+    btn.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      dragging = true; moved = false; pointerId = e.pointerId;
+      startX = e.clientX; startY = e.clientY;
+      const r = btn.getBoundingClientRect();
+      originLeft = r.left; originTop = r.top;
+      btn.setPointerCapture(pointerId);
+      e.preventDefault();
+    });
+
+    btn.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - startX, dy = e.clientY - startY;
+      if (!moved && Math.hypot(dx, dy) >= 4) {
+        moved = true;
+        btn.classList.add('osb-dragging');
+      }
+      if (moved) applyPos(btn, { left: originLeft + dx, top: originTop + dy });
+    });
+
+    function endDrag(e) {
+      if (!dragging) return;
+      dragging = false;
+      btn.classList.remove('osb-dragging');
+      try { btn.releasePointerCapture(pointerId); } catch {}
+      if (moved) {
+        const r = btn.getBoundingClientRect();
+        localStorage.setItem(POS_KEY, JSON.stringify({ left: r.left, top: r.top }));
+      } else {
+        openModal();
+      }
+    }
+    btn.addEventListener('pointerup', endDrag);
+    btn.addEventListener('pointercancel', endDrag);
+
+    // Keep the button on-screen if the window resizes.
+    window.addEventListener('resize', () => applyPos(btn, loadPos()));
   }
 
   function closeModal() {
