@@ -1,0 +1,9 @@
+{
+  "onshape_access_key": "PASTE_ACCESS_KEY_HERE",
+  "onshape_secret_key": "PASTE_SECRET_KEY_HERE",
+  "onshape_base_url": "https://cad.onshape.com",
+  "bambu_studio_path": "C:\\Program Files\\Bambu Studio\\bambu-studio.exe",
+  "export_dir": "",
+  "export_format": "3MF",
+  "port": 7777
+}

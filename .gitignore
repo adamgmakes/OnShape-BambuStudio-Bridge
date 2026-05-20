@@ -1,0 +1,29 @@
+# Secrets — never commit
+config.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+.env
+
+# Runtime
+server/bridge.log
+server/*.log
+
+# Claude Code per-user settings
+.claude/
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Local exports (in case anyone runs from inside the repo)
+OnshapeExports/
+*.stl
+*.3mf
