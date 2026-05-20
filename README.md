@@ -1,7 +1,7 @@
 # Onshape → Bambu Studio
 
 One-click "Send to Bambu" button inside Onshape. Pick which parts of the
-current Part Studio you want to print, and they're exported as `.3mf` files
+current Part Studio you want to print, and they're exported as `.3mf` or `.stl` files
 and loaded into Bambu Studio.
 
 No more re-exporting, naming files, or hunting through your Downloads folder
@@ -18,7 +18,7 @@ pieces that bridge them:
 1. **A small Python service** that runs on `localhost:7777`. It talks to
    the Onshape REST API to list and export parts, then launches Bambu Studio
    with the resulting files.
-2. **A Tampermonkey userscript** that adds a green "Send to Bambu" button
+2. **A Tampermonkey userscript** that adds a "Send to Bambu" button
    to every Onshape document page. When you click it, it calls the local
    service.
 
@@ -99,7 +99,7 @@ Exported files live at `%USERPROFILE%\OnshapeExports\<DocName>__<ElementName>\`.
 
 ## Configuration
 
-`config.json` (created by the installer; **gitignored**):
+`config.json` (created by the installer):
 
 | Field | What it does |
 |---|---|
@@ -194,6 +194,6 @@ MIT. See [LICENSE](LICENSE).
 
 ## Acknowledgments
 
-Built for Bambu P1S iteration speed. Onshape's
+Built for Bambu Studio iteration speed. Onshape's
 [public REST API](https://onshape-public.github.io/docs/) makes the cloud
 side possible.
