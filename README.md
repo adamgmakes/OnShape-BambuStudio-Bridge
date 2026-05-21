@@ -93,21 +93,31 @@ time to update credentials.
 1. Open any Part Studio at `cad.onshape.com`.
 2. A green **Send to Bambu** button appears in the bottom-right corner.
    You can drag it anywhere on the page — its position is remembered.
-3. Click it → check the parts you want → **Export & Open**.
-4. Bambu Studio launches with the parts loaded.
-5. Alternatively, click "Export only" and in Bambu Studio, right click on the part and select "Reload from disk" to keep supports, position, and slicing settings intact.
+3. Click it → check the parts you want → **Export & Open** (launches Bambu
+   Studio with the parts loaded) or **Export only** (overwrites files on
+   disk without touching Bambu — then, **Right click on part → Reload from disk**
+   in an already-open Bambu window).
+4. That's it.
 
-For this to feel best, enable **Preferences → General → Single Instance**
-in Bambu Studio so the helper doesn't try to spawn a new instance each time.
+If you're starting fresh (no project open yet), use **Export & Open** for
+the first round so Bambu launches with your parts loaded; subsequent rounds
+use **Export only**.
+
+Optionally enable **Preferences → General → Single Instance** in Bambu
+Studio so any future "Export & Open" routes into your running window
+instead of spawning a new one.
 
 ## Iteration workflow
 
-The big win is iterating on a print. Once you've sliced a part once:
+If you're iterating on a part already in Bambu Studio, you can just export to save your settings, positioning, etc. Once you've sliced a part once:
 
 1. Edit your model in Onshape.
-2. Click **Send to Bambu** again, and select "Export only". The same filename gets overwritten on disk.
-4. In Bambu Studio: **Right click on the old part → Reload from disk**. Your supports, plate
+2. Click **Send to Bambu**, then in the modal use **Export only**. This overwrites the file on disk without re-launching
+   Bambu Studio.
+3. In Bambu Studio: **Right click on the old part → Reload from disk**. Your supports, plate
    position, and slicing settings are preserved — only the geometry updates.
+
+    
 
 Exported files live at `%USER%\OnshapeExports\<DocName>__<ElementName>\`.
 
