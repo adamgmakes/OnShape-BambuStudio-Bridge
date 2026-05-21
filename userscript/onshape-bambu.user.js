@@ -179,6 +179,7 @@
         <div id="osb-status"></div>
         <div class="osb-actions">
           <button class="osb-btn-secondary" id="osb-cancel">Cancel</button>
+          <button class="osb-btn-secondary" id="osb-export-only" title="Overwrite files on disk without launching Bambu Studio. Use Bambu's File &rarr; Reload from disk to pick up changes.">Export only</button>
           <button class="osb-btn-primary" id="osb-send">Export &amp; Open</button>
         </div>
       </div>`;
@@ -212,7 +213,7 @@
     document.getElementById('osb-none').onclick = () =>
       listEl.querySelectorAll('input[type=checkbox]').forEach(c => c.checked = false);
 
-    document.getElementById('osb-send').onclick = async () => {
+    async function doExport(openInBambu) {
       const checked = [...listEl.querySelectorAll('input[type=checkbox]:checked')];
       if (!checked.length) { setStatus('Select at least one part.'); return; }
       const partIds = checked.map(c => c.value);
@@ -224,16 +225,21 @@
         const r = await fetch(`${BRIDGE}/export`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...ids, partIds, partNames, ...names, openInBambu: true }),
+          body: JSON.stringify({ ...ids, partIds, partNames, ...names, openInBambu }),
         });
         if (!r.ok) throw new Error(`bridge ${r.status}: ${await r.text()}`);
         const j = await r.json();
-        setStatus(`Sent ${j.files.length} file(s) to Bambu Studio.`);
-        setTimeout(closeModal, 900);
+        setStatus(openInBambu
+          ? `Sent ${j.files.length} file(s) to Bambu Studio.`
+          : `Wrote ${j.files.length} file(s). Use Bambu's File → Reload from disk.`);
+        setTimeout(closeModal, openInBambu ? 900 : 1500);
       } catch (e) {
         setStatus(`Error: ${e}`);
       }
-    };
+    }
+
+    document.getElementById('osb-send').onclick = () => doExport(true);
+    document.getElementById('osb-export-only').onclick = () => doExport(false);
   }
 
   function setStatus(s) {
