@@ -7,7 +7,10 @@ and loaded into Bambu Studio.
 No more re-exporting, naming files, or hunting through your Downloads folder
 every time you tweak a design.
 
-![demo placeholder — add a screenshot or GIF here]
+<img width="1101" height="633" alt="image" src="https://github.com/user-attachments/assets/fc8802d5-436a-4fb1-9488-ef877e4fbe09" />
+
+<img width="1219" height="706" alt="image" src="https://github.com/user-attachments/assets/d8415880-1dc9-4b2b-90ed-38d0de0b3515" />
+
 
 ## How it works
 
@@ -45,12 +48,16 @@ The service is bound to `127.0.0.1` only and CORS-locked to
    both fine.
 4. Copy the **Access key** and **Secret key** — you'll paste them in the
    installer. The secret is shown only once.
+   
+<img width="1217" height="704" alt="image" src="https://github.com/user-attachments/assets/0044572a-ceb5-4c1a-9d60-8b600d6cb195" />
+
+<img width="1215" height="706" alt="image" src="https://github.com/user-attachments/assets/233a9233-777d-4049-b86f-4f05ae6c89e1" />
 
 ### 2. Clone and install
 
 ```powershell
-git clone https://github.com/<you>/onshape-bambu.git
-cd onshape-bambu
+git clone https://github.com/adamgmakes/OnShape-BambuStudio-Bridge.git
+cd OnShape-BambuStudio-Bridge
 .\install.ps1
 ```
 
@@ -60,14 +67,15 @@ The installer will:
 - Create a venv at `server\.venv` and install dependencies
 - Prompt you for your Onshape access key + secret (secret is masked)
 - Auto-detect your Bambu Studio install path
-- Write `config.json` and attempt to lock its ACL to your Windows user
-  (best-effort; harmless if it can't)
+- Write `config.json` 
 - Run a smoke test against the Onshape API
 - Offer to install the bridge to your Startup folder (auto-launch on login)
 - Start the bridge immediately
 
 If the smoke test fails, the installer tells you so. You can re-run it any
 time to update credentials.
+
+<img width="1245" height="815" alt="image" src="https://github.com/user-attachments/assets/156ab119-7768-4d74-9ddc-3b261277cfb4" />
 
 ### 3. Install the userscript
 
@@ -77,27 +85,41 @@ time to update credentials.
 3. Click the Tampermonkey extension icon → **Create a new script** → paste
    over the template → **Ctrl+S** to save.
 
+<img width="1217" height="706" alt="image" src="https://github.com/user-attachments/assets/69a67b5d-698e-4257-b644-dce623376c34" />
+
+
 ### 4. Use it
 
 1. Open any Part Studio at `cad.onshape.com`.
 2. A green **Send to Bambu** button appears in the bottom-right corner.
    You can drag it anywhere on the page — its position is remembered.
-3. Click it → check the parts you want → **Export & Open**.
-4. Bambu Studio launches with the parts loaded.
+3. Click it → check the parts you want → **Export & Open** (launches Bambu
+   Studio with the parts loaded) or **Export only** (overwrites files on
+   disk without touching Bambu — then, **Right click on part → Reload from disk**
+   in an already-open Bambu window).
+4. That's it.
+
+If you're starting fresh (no project open yet), use **Export & Open** for
+the first round so Bambu launches with your parts loaded; subsequent rounds
+use **Export only**.
+
+Optionally enable **Preferences → General → Single Instance** in Bambu
+Studio so any future "Export & Open" routes into your running window
+instead of spawning a new one.
 
 ## Iteration workflow
 
-The big win is iterating on a print. Once you've sliced a part once:
+If you're iterating on a part already in Bambu Studio, you can just export to save your settings, positioning, etc. Once you've sliced a part once:
 
 1. Edit your model in Onshape.
-2. Click **Send to Bambu** again. The same filename gets overwritten on disk.
-3. In Bambu Studio: **File → Reload from disk**. Your supports, plate
+2. Click **Send to Bambu**, then in the modal use **Export only**. This overwrites the file on disk without re-launching
+   Bambu Studio.
+3. In Bambu Studio: **Right click on the old part → Reload from disk**. Your supports, plate
    position, and slicing settings are preserved — only the geometry updates.
 
-For this to feel best, enable **Preferences → General → Single Instance**
-in Bambu Studio so the helper doesn't try to spawn a second copy.
+    
 
-Exported files live at `%USERPROFILE%\OnshapeExports\<DocName>__<ElementName>\`.
+Exported files live at `%USER%\OnshapeExports\<DocName>__<ElementName>\`.
 
 ## Configuration
 
@@ -110,10 +132,12 @@ Exported files live at `%USERPROFILE%\OnshapeExports\<DocName>__<ElementName>\`.
 | `onshape_base_url` | Onshape host (default `https://cad.onshape.com`) |
 | `bambu_studio_path` | Full path to `bambu-studio.exe` |
 | `export_dir` | Where exports land (empty = `~/OnshapeExports`) |
-| `export_format` | `"3MF"` (default) or `"STL"` |
+| `export_format` | `"3MF"` or `"STL"` |
 | `port` | Local port the bridge listens on (default 7777) |
 
 See [`config.example.json`](config.example.json) for the template.
+
+Note: 3MF may be used if preferred, but STL will load faster 
 
 If you change the port, also update the `BRIDGE` constant at the top of
 `userscript/onshape-bambu.user.js`.
